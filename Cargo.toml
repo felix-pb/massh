@@ -1,14 +1,14 @@
 [package]
 name = "massh"
-version = "0.1.0"
+version = "0.2.0"
 edition = "2018"
 license = "MIT OR Apache-2.0"
 readme = "README.md"
 repository = "https://github.com/felix-pb/massh"
 documentation = "https://docs.rs/massh"
 description = """
-1 library and 2 binary crates to run SSH/SCP commands on a "mass" of hosts in parallel.
-The binary crates are CLI and GUI "frontends" for the library "backend".
+This library is a simple wrapper around the [`ssh2`] crate
+to run SSH/SCP commands on a "mass" of hosts in parallel.
 """
 exclude = ["vue"]
 

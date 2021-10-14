@@ -119,7 +119,8 @@ impl ConfigFile {
     /// let config = ConfigFile::from_json(&json).unwrap();
     /// ```
     pub fn from_json(json: &str) -> Result<Self> {
-        Err(anyhow::anyhow!(json.to_owned()))
+        let config: ConfigFile = serde_json::from_str(json)?;
+        Ok(config)
     }
 
     /// Attempts to construct a new `ConfigFile` from a YAML string.
@@ -170,10 +171,11 @@ impl ConfigFile {
     /// use massh::ConfigFile;
     ///
     /// let yaml = std::fs::read_to_string("massh.yaml").unwrap();
-    /// let config = ConfigFile::from_json(&yaml).unwrap();
+    /// let config = ConfigFile::from_yaml(&yaml).unwrap();
     /// ```
     pub fn from_yaml(yaml: &str) -> Result<Self> {
-        Err(anyhow::anyhow!(yaml.to_owned()))
+        let config: ConfigFile = serde_yaml::from_str(yaml)?;
+        Ok(config)
     }
 }
 

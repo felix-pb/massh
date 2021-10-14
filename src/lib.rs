@@ -1,4 +1,4 @@
-//! This crate is a simple wrapper around the [`ssh2`] crate
+//! This library is a simple wrapper around the [`ssh2`] crate
 //! to run SSH/SCP commands on a "mass" of hosts in parallel.
 //!
 //! The `massh` *library* is mainly intended to support the `massh` *binary*:
