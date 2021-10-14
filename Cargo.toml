@@ -1,0 +1,26 @@
+[package]
+name = "massh"
+version = "0.1.0"
+edition = "2018"
+license = "MIT OR Apache-2.0"
+readme = "README.md"
+repository = "https://github.com/felix-pb/massh"
+documentation = "https://docs.rs/massh"
+description = """
+1 library and 2 binary crates to run SSH/SCP commands on a "mass" of hosts in parallel.
+The binary crates are CLI and GUI "frontends" for the library "backend".
+"""
+exclude = ["vue"]
+
+[dependencies]
+ansi_term = "0.12.1"
+anyhow = "1.0.44"
+parking_lot = "0.11.2"
+serde = { version = "1.0.130", features = ["derive"] }
+serde_json = "1.0.68"
+serde_yaml = "0.8.21"
+ssh2 = "0.9.3"
+structopt = "0.3.23"
+threadpool = "1.8.1"
+tokio = { version = "1.12.0", features = ["full"] }
+warp = "0.3.1"
