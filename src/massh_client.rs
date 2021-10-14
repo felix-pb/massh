@@ -230,7 +230,7 @@ impl MasshClient {
             let task_closure = move || {
                 let mut client = client.lock();
                 local_path.push(&host);
-                let result = client.scp_download(local_path, remote_path);
+                let result = client.scp_upload(local_path, remote_path);
                 let _ = tx.send((host, result));
             };
 

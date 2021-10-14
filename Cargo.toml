@@ -7,7 +7,7 @@ readme = "README.md"
 repository = "https://github.com/felix-pb/massh"
 documentation = "https://docs.rs/massh"
 description = """
-This library is a simple wrapper around the [`ssh2`] crate
+This library is a simple wrapper around the ssh2 crate
 to run SSH/SCP commands on a "mass" of hosts in parallel.
 """
 exclude = ["vue"]
