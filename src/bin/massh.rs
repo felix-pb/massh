@@ -4,14 +4,18 @@ use massh::{MasshClient, MasshConfig};
 use std::path::PathBuf;
 use structopt::StructOpt;
 
+/// A Rust version of the parallel SSH program pssh(1), configured with JSON or YAML.
+///
+/// For more details and examples, check the documentation:
+/// https://docs.rs/massh/latest/massh/struct.MasshConfig.html
 #[derive(StructOpt)]
 struct Opt {
     #[structopt(subcommand)]
     cmd: Command,
-    /// Path of JSON configuration file (only 1 format must be specified)
+    /// Path of JSON configuration file
     #[structopt(short, long, conflicts_with("yaml"), required_unless("yaml"))]
     json: Option<PathBuf>,
-    /// Path of YAML configuration file (only 1 format must be specified)
+    /// Path of YAML configuration file
     #[structopt(short, long, conflicts_with("json"), required_unless("json"))]
     yaml: Option<PathBuf>,
 }
@@ -39,7 +43,7 @@ enum Command {
     },
 }
 
-/// Configuration file formats supported by the `MasshClient` struct.
+/// Configuration file formats supported by the `MasshConfig` struct.
 enum Format {
     Json,
     Yaml,
@@ -77,11 +81,11 @@ fn main() {
     });
     let massh = MasshClient::from(&config);
 
-    // Match the subcommand and call the corresponding `MasshClient` method, all of which return
+    // Match the subcommand and call the corresponding `MasshClient` method. These methods return
     // the receiving half of a `std::sync::mpsc::channel`. Exactly 1 message per host is received.
     let (mut num_success, mut num_warning, mut num_failure) = (0, 0, 0);
     match &opt.cmd {
-        // Process the `execute` subcommand's received messages.
+        // Process the received messages of the `execute` subcommand.
         Command::Execute { command } => {
             let rx = massh.execute(command);
             while let Ok((host, result)) = rx.recv() {
@@ -103,7 +107,7 @@ fn main() {
                 }
             }
         }
-        // Process the `scp-download` and `scp-upload` subcommands' received messages.
+        // Process the received messages of the `scp-download` and `scp-upload` subcommands.
         _ => {
             let rx = match &opt.cmd {
                 Command::ScpDownload {
@@ -136,15 +140,17 @@ fn main() {
 
 /// Prints a summary of the number of successes, warnings, or failures.
 fn print_summary(label: &str, count: usize) {
-    let color = match label {
-        "success" => Green,
-        "warning" => Yellow,
-        "failure" => Red,
-        _ => unreachable!(),
-    };
-    let noun = if count == 1 { "host" } else { "hosts" };
-    let message = format!("{}: {} {}", label, count, noun);
-    println!("{}", color.paint(message));
+    if count > 0 {
+        let color = match label {
+            "success" => Green,
+            "warning" => Yellow,
+            "failure" => Red,
+            _ => unreachable!(),
+        };
+        let noun = if count == 1 { "host" } else { "hosts" };
+        let message = format!("{}: {} {}", label, count, noun);
+        println!("{}", color.paint(message));
+    }
 }
 
 /// Prints host's success message in green.
