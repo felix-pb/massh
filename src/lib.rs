@@ -23,6 +23,6 @@ mod config;
 mod massh_client;
 mod ssh_client;
 
-pub use config::{Auth, ConfigFile, ConfigHost};
+pub use config::{MasshConfig, MasshHostConfig};
 pub use massh_client::{MasshClient, MasshHost, MasshReceiver};
-pub use ssh_client::{CommandOutput, SshClient};
+pub use ssh_client::{SshAuth, SshClient, SshOutput};

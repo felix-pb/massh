@@ -1,6 +1,6 @@
 use ansi_term::Color::{Cyan, Green, Purple, Red, Yellow};
 use anyhow::Error;
-use massh::{ConfigFile, MasshClient};
+use massh::{MasshClient, MasshConfig};
 use std::path::PathBuf;
 use structopt::StructOpt;
 
@@ -67,8 +67,8 @@ fn main() {
         std::process::exit(1);
     });
     let result = match format {
-        Format::Json => ConfigFile::from_json(&string),
-        Format::Yaml => ConfigFile::from_yaml(&string),
+        Format::Json => MasshConfig::from_json(&string),
+        Format::Yaml => MasshConfig::from_yaml(&string),
     };
     let config = result.unwrap_or_else(|error| {
         let message = Red.paint(format!("Failed to parse {:?}: {}", path, error));

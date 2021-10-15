@@ -1,13 +1,27 @@
-use crate::Auth;
 use anyhow::Result;
+use serde::Deserialize;
 use ssh2::Session;
 use std::io::{Read, Write};
 use std::net::{SocketAddr, TcpStream, ToSocketAddrs};
 use std::path::{Path, PathBuf};
 use std::time::Duration;
 
-/// Output of a command executed over SSH.
-pub struct CommandOutput {
+/// SSH authentication method.
+#[derive(Deserialize)]
+pub enum SshAuth {
+    /// Agent authentication with the first public key found in an SSH agent.
+    #[serde(rename = "agent")]
+    Agent,
+    /// Basic password authentication.
+    #[serde(rename = "password")]
+    Password(String),
+    /// Public key authentication using a PEM encoded private key file stored on disk.
+    #[serde(rename = "pubkey")]
+    Pubkey(PathBuf),
+}
+
+/// SSH command output.
+pub struct SshOutput {
     /// Exit status
     pub exit_status: i32,
     /// Standard error
@@ -75,7 +89,7 @@ pub struct CommandOutput {
 /// ```
 pub struct SshClient {
     addr: SocketAddr,
-    auth: Auth,
+    auth: SshAuth,
     session: Option<Session>,
     timeout: u64,
     user: String,
@@ -96,7 +110,7 @@ impl SshClient {
     pub fn from(user: impl Into<String>, addr: impl Into<SocketAddr>) -> Self {
         Self {
             addr: addr.into(),
-            auth: Auth::Agent,
+            auth: SshAuth::Agent,
             session: None,
             timeout: 0,
             user: user.into(),
@@ -122,7 +136,7 @@ impl SshClient {
         if let Some(addr) = addr.to_socket_addrs()?.next() {
             Ok(Self {
                 addr,
-                auth: Auth::Agent,
+                auth: SshAuth::Agent,
                 session: None,
                 timeout: 0,
                 user: user.into(),
@@ -145,7 +159,7 @@ impl SshClient {
     /// ssh.set_auth_agent();
     /// ```
     pub fn set_auth_agent(&mut self) -> &mut Self {
-        self.auth = Auth::Agent;
+        self.auth = SshAuth::Agent;
         self
     }
 
@@ -158,7 +172,7 @@ impl SshClient {
     /// ssh.set_auth_password("top-secret");
     /// ```
     pub fn set_auth_password(&mut self, password: impl Into<String>) -> &mut Self {
-        self.auth = Auth::Password(password.into());
+        self.auth = SshAuth::Password(password.into());
         self
     }
 
@@ -172,7 +186,7 @@ impl SshClient {
     /// ssh.set_auth_pubkey("/home/username/.ssh/id_rsa");
     /// ```
     pub fn set_auth_pubkey(&mut self, path: impl Into<PathBuf>) -> &mut Self {
-        self.auth = Auth::Pubkey(path.into());
+        self.auth = SshAuth::Pubkey(path.into());
         self
     }
 
@@ -198,7 +212,7 @@ impl SshClient {
     }
 
     /// Returns the authentication method of this `SshClient`'s configured host.
-    pub fn get_auth(&self) -> &Auth {
+    pub fn get_auth(&self) -> &SshAuth {
         &self.auth
     }
 
@@ -225,7 +239,7 @@ impl SshClient {
     /// Note that this method implicitly calls [`SshClient::connect`] if no session was
     /// established prior. Otherwise, it reuses the cached session.
     ///
-    /// If successful, it returns a [`CommandOutput`] containing the exit status, standard output,
+    /// If successful, it returns a [`SshOutput`] containing the exit status, standard output,
     /// and standard error of the command.
     ///
     /// ## Example
@@ -238,7 +252,7 @@ impl SshClient {
     /// println!("stdout: {}", String::from_utf8(output.stdout).unwrap());
     /// println!("stderr: {}", String::from_utf8(output.stderr).unwrap());
     /// ```
-    pub fn execute(&mut self, command: &str) -> Result<CommandOutput> {
+    pub fn execute(&mut self, command: &str) -> Result<SshOutput> {
         // Establish authenticated SSH session.
         if self.session.is_none() {
             self.connect()?;
@@ -265,7 +279,7 @@ impl SshClient {
         let exit_status = channel.exit_status()?;
 
         // Return successfully.
-        Ok(CommandOutput {
+        Ok(SshOutput {
             exit_status,
             stdout,
             stderr,
@@ -398,9 +412,9 @@ impl SshClient {
 
         // Perform SSH authentication based on selected method.
         match &self.auth {
-            Auth::Agent => session.userauth_agent(&self.user)?,
-            Auth::Password(password) => session.userauth_password(&self.user, password)?,
-            Auth::Pubkey(path) => session.userauth_pubkey_file(&self.user, None, path, None)?,
+            SshAuth::Agent => session.userauth_agent(&self.user)?,
+            SshAuth::Password(password) => session.userauth_password(&self.user, password)?,
+            SshAuth::Pubkey(path) => session.userauth_pubkey_file(&self.user, None, path, None)?,
         }
 
         // Confirm that the session is authenticated.

@@ -1,4 +1,4 @@
-use crate::{Auth, CommandOutput, ConfigFile, SshClient};
+use crate::{MasshConfig, SshAuth, SshClient, SshOutput};
 use anyhow::Result;
 use parking_lot::Mutex;
 use std::collections::HashMap;
@@ -28,11 +28,11 @@ pub type MasshReceiver<T> = Receiver<(MasshHost, Result<T>)>;
 /// ## Example
 ///
 /// ```no_run
-/// use massh::{ConfigFile, MasshClient};
+/// use massh::{MasshConfig, MasshClient};
 ///
 /// // Construct a new `MasshClient` from a YAML configuration file.
 /// let yaml = std::fs::read_to_string("massh.yaml").unwrap();
-/// let config = ConfigFile::from_json(&yaml).unwrap();
+/// let config = MasshConfig::from_json(&yaml).unwrap();
 /// let massh = MasshClient::from(&config);
 ///
 /// // Run a command on all the configured host.
@@ -55,17 +55,17 @@ pub struct MasshClient {
 impl MasshClient {
     /// Constructs a new `MasshClient` from the specified configuration file.
     ///
-    /// See [`ConfigFile`] for more details.
+    /// See [`MasshConfig`] for more details.
     ///
     /// ## Example
     /// ```no_run
-    /// use massh::{ConfigFile, MasshClient};
+    /// use massh::{MasshConfig, MasshClient};
     ///
     /// let yaml = std::fs::read_to_string("massh.yaml").unwrap();
-    /// let config = ConfigFile::from_json(&yaml).unwrap();
+    /// let config = MasshConfig::from_json(&yaml).unwrap();
     /// let massh = MasshClient::from(&config);
     /// ```
-    pub fn from(config: &ConfigFile) -> Self {
+    pub fn from(config: &MasshConfig) -> Self {
         // Configure the internal SSH clients.
         let mut clients = HashMap::new();
         config.hosts.iter().for_each(|host| {
@@ -85,9 +85,9 @@ impl MasshClient {
 
             let mut ssh = SshClient::from(user, (addr, port));
             match auth {
-                Auth::Agent => ssh.set_auth_agent(),
-                Auth::Password(password) => ssh.set_auth_password(password),
-                Auth::Pubkey(path) => ssh.set_auth_pubkey(path),
+                SshAuth::Agent => ssh.set_auth_agent(),
+                SshAuth::Password(password) => ssh.set_auth_password(password),
+                SshAuth::Pubkey(path) => ssh.set_auth_pubkey(path),
             };
             ssh.set_timeout(config.timeout);
 
@@ -120,7 +120,7 @@ impl MasshClient {
     ///     println!("Command succeeded on {}? {}", host, result.is_ok());
     /// }
     /// ```
-    pub fn execute(&self, command: impl Into<String>) -> MasshReceiver<CommandOutput> {
+    pub fn execute(&self, command: impl Into<String>) -> MasshReceiver<SshOutput> {
         let command = command.into();
 
         // Create a multi-producer, single-consumer channel.

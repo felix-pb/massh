@@ -1,30 +1,16 @@
+use crate::SshAuth;
 use anyhow::Result;
 use serde::{Deserialize, Deserializer};
 use std::net::{IpAddr, ToSocketAddrs};
-use std::path::PathBuf;
 
-/// Authentication method.
+/// One of the configured hosts in a `MasshConfig`.
 #[derive(Deserialize)]
-pub enum Auth {
-    /// Agent authentication using the first public key found in an SSH agent.
-    #[serde(rename = "agent")]
-    Agent,
-    /// Basic password authentication.
-    #[serde(rename = "password")]
-    Password(String),
-    /// Public key authentication using a PEM encoded private key file stored on disk.
-    #[serde(rename = "pubkey")]
-    Pubkey(PathBuf),
-}
-
-/// One of the configured hosts in a `ConfigFile`.
-#[derive(Deserialize)]
-#[serde(from = "ConfigHostEnum")]
-pub struct ConfigHost {
+#[serde(from = "MasshHostConfigEnum")]
+pub struct MasshHostConfig {
     /// IP address.
     pub addr: IpAddr,
     /// Optional authentication method to override the default.
-    pub auth: Option<Auth>,
+    pub auth: Option<SshAuth>,
     /// Optional port number to override the default.
     pub port: Option<u16>,
     /// Optional username to override the default.
@@ -33,9 +19,9 @@ pub struct ConfigHost {
 
 /// Configuration file to build a `MasshClient`.
 #[derive(Deserialize)]
-pub struct ConfigFile {
+pub struct MasshConfig {
     /// Default authentication method for the configured hosts.
-    pub default_auth: Auth,
+    pub default_auth: SshAuth,
     /// Default port number for the configured hosts.
     pub default_port: u16,
     /// Default username for the configured hosts.
@@ -52,11 +38,11 @@ pub struct ConfigFile {
     ///
     /// Every host is uniquely identified by its username, IP address and port number.
     /// Duplicates are discarded.
-    pub hosts: Vec<ConfigHost>,
+    pub hosts: Vec<MasshHostConfig>,
 }
 
-impl ConfigFile {
-    /// Attempts to construct a new `ConfigFile` from a JSON string.
+impl MasshConfig {
+    /// Attempts to construct a new `MasshConfig` from a JSON string.
     ///
     /// ## Simple Example
     ///
@@ -113,17 +99,17 @@ impl ConfigFile {
     /// ## Usage
     ///
     /// ```no_run
-    /// use massh::ConfigFile;
+    /// use massh::MasshConfig;
     ///
     /// let json = std::fs::read_to_string("massh.json").unwrap();
-    /// let config = ConfigFile::from_json(&json).unwrap();
+    /// let config = MasshConfig::from_json(&json).unwrap();
     /// ```
     pub fn from_json(json: &str) -> Result<Self> {
-        let config: ConfigFile = serde_json::from_str(json)?;
+        let config: MasshConfig = serde_json::from_str(json)?;
         Ok(config)
     }
 
-    /// Attempts to construct a new `ConfigFile` from a YAML string.
+    /// Attempts to construct a new `MasshConfig` from a YAML string.
     ///
     /// ## Simple Example
     ///
@@ -168,43 +154,43 @@ impl ConfigFile {
     /// ## Usage
     ///
     /// ```no_run
-    /// use massh::ConfigFile;
+    /// use massh::MasshConfig;
     ///
     /// let yaml = std::fs::read_to_string("massh.yaml").unwrap();
-    /// let config = ConfigFile::from_yaml(&yaml).unwrap();
+    /// let config = MasshConfig::from_yaml(&yaml).unwrap();
     /// ```
     pub fn from_yaml(yaml: &str) -> Result<Self> {
-        let config: ConfigFile = serde_yaml::from_str(yaml)?;
+        let config: MasshConfig = serde_yaml::from_str(yaml)?;
         Ok(config)
     }
 }
 
 // The rest of this file consists of private items to help deserialize
-// a `ConfigHost` struct from either a map or a string.
+// a `MasshHostConfig` struct from either a map or a string.
 
 #[derive(Deserialize)]
-struct InnerConfigHost {
+struct InnerMasshHostConfig {
     addr: IpAddr,
-    auth: Option<Auth>,
+    auth: Option<SshAuth>,
     port: Option<u16>,
     user: Option<String>,
 }
 
 #[derive(Deserialize)]
 #[serde(untagged)]
-enum ConfigHostEnum {
-    FromMap(InnerConfigHost),
+enum MasshHostConfigEnum {
+    FromMap(InnerMasshHostConfig),
     #[serde(deserialize_with = "deserialize_host_from_str")]
-    FromStr(InnerConfigHost),
+    FromStr(InnerMasshHostConfig),
 }
 
-impl From<ConfigHostEnum> for ConfigHost {
-    fn from(e: ConfigHostEnum) -> ConfigHost {
+impl From<MasshHostConfigEnum> for MasshHostConfig {
+    fn from(e: MasshHostConfigEnum) -> MasshHostConfig {
         let inner = match e {
-            ConfigHostEnum::FromMap(inner) => inner,
-            ConfigHostEnum::FromStr(inner) => inner,
+            MasshHostConfigEnum::FromMap(inner) => inner,
+            MasshHostConfigEnum::FromStr(inner) => inner,
         };
-        ConfigHost {
+        MasshHostConfig {
             addr: inner.addr,
             auth: inner.auth,
             port: inner.port,
@@ -213,7 +199,7 @@ impl From<ConfigHostEnum> for ConfigHost {
     }
 }
 
-fn deserialize_host_from_str<'de, D>(deserializer: D) -> Result<InnerConfigHost>
+fn deserialize_host_from_str<'de, D>(deserializer: D) -> Result<InnerMasshHostConfig>
 where
     D: Deserializer<'de>,
 {
@@ -244,7 +230,7 @@ where
     let addr = socket.ip();
     let port = if no_port { None } else { Some(socket.port()) };
 
-    Ok(InnerConfigHost {
+    Ok(InnerMasshHostConfig {
         addr,
         auth: None,
         port,
