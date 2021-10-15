@@ -179,9 +179,10 @@ impl MasshClient {
         self.clients.iter().for_each(|(host, client)| {
             // Prepare a task closure responsible for sending the result of the operation.
             let (client, host, tx) = (client.clone(), host.clone(), tx.clone());
-            let (remote_path, local_path) = (remote_path.clone(), local_path.clone());
+            let (remote_path, mut local_path) = (remote_path.clone(), local_path.clone());
             let task_closure = move || {
                 let mut client = client.lock();
+                local_path.push(&host);
                 let result = client.scp_download(remote_path, local_path);
                 let _ = tx.send((host, result));
             };
@@ -226,10 +227,9 @@ impl MasshClient {
         self.clients.iter().for_each(|(host, client)| {
             // Prepare a task closure responsible for sending the result of the operation.
             let (client, host, tx) = (client.clone(), host.clone(), tx.clone());
-            let (mut local_path, remote_path) = (local_path.clone(), remote_path.clone());
+            let (local_path, remote_path) = (local_path.clone(), remote_path.clone());
             let task_closure = move || {
                 let mut client = client.lock();
-                local_path.push(&host);
                 let result = client.scp_upload(local_path, remote_path);
                 let _ = tx.send((host, result));
             };
