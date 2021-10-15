@@ -68,7 +68,7 @@ pub struct SshOutput {
 /// use massh::SshClient;
 /// use std::net::Ipv4Addr;
 ///
-/// // Construct a new SSH client for "username@localhost:22".
+/// // Construct a new `SshClient` for `username@127.0.0.1:22`.
 /// let mut ssh = SshClient::from("username", (Ipv4Addr::LOCALHOST, 22));
 ///
 /// // Configure the client.
@@ -82,7 +82,6 @@ pub struct SshOutput {
 ///
 /// // Run a command and print its output.
 /// let output = ssh.execute("cat remote-copy.txt").unwrap();
-///
 /// println!("status: {}", output.exit_status);
 /// println!("stdout: {}", String::from_utf8(output.stdout).unwrap());
 /// println!("stderr: {}", String::from_utf8(output.stderr).unwrap());

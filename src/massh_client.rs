@@ -35,7 +35,7 @@ pub type MasshReceiver<T> = Receiver<(MasshHost, Result<T>)>;
 /// let config = MasshConfig::from_json(&yaml).unwrap();
 /// let massh = MasshClient::from(&config);
 ///
-/// // Run a command on all the configured host.
+/// // Run a command on all the configured hosts.
 /// let rx = massh.execute("docker ps");
 ///
 /// // Receive the result of the command for each host and print its output.
