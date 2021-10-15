@@ -3,11 +3,11 @@ use anyhow::Result;
 use serde::{Deserialize, Deserializer};
 use std::net::{IpAddr, ToSocketAddrs};
 
-/// One of the configured hosts in a `MasshConfig`.
+/// Configuration for a `MasshClient` target host.
 #[derive(Deserialize)]
 #[serde(from = "MasshHostConfigEnum")]
 pub struct MasshHostConfig {
-    /// IP address.
+    /// IP address, either IPv4 or IPv6.
     pub addr: IpAddr,
     /// Optional authentication method to override the default.
     pub auth: Option<SshAuth>,
@@ -17,14 +17,14 @@ pub struct MasshHostConfig {
     pub user: Option<String>,
 }
 
-/// Configuration file to build a `MasshClient`.
+/// Configuration for a `MasshClient`.
 #[derive(Deserialize)]
 pub struct MasshConfig {
-    /// Default authentication method for the configured hosts.
+    /// Default authentication method for all configured hosts.
     pub default_auth: SshAuth,
-    /// Default port number for the configured hosts.
+    /// Default port number for all configured hosts.
     pub default_port: u16,
-    /// Default username for the configured hosts.
+    /// Default username for all configured hosts.
     pub default_user: String,
     /// Number of threads in the internal thread pool.
     ///
@@ -36,7 +36,7 @@ pub struct MasshConfig {
     pub timeout: u64,
     /// List of configured hosts.
     ///
-    /// Every host is uniquely identified by its username, IP address and port number.
+    /// Internally, every host is uniquely identified by the tuple (username, ip_address, port).
     /// Duplicates are discarded.
     pub hosts: Vec<MasshHostConfig>,
 }

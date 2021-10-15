@@ -82,7 +82,7 @@ fn main() {
     let massh = MasshClient::from(&config);
 
     // Match the subcommand and call the corresponding `MasshClient` method. These methods return
-    // the receiving half of a `std::sync::mpsc::channel`. Exactly 1 message per host is received.
+    // the receiving half of a `std::sync::mpsc::channel` which receives exactly 1 message per host.
     let (mut num_success, mut num_warning, mut num_failure) = (0, 0, 0);
     match &opt.cmd {
         // Process the received messages of the `execute` subcommand.

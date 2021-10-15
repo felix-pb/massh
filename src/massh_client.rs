@@ -7,10 +7,10 @@ use std::sync::mpsc::Receiver;
 use std::sync::Arc;
 use threadpool::ThreadPool;
 
-/// One of the configured hosts of a [`MasshClient`] represented as "username@ip-address:port".
+/// Unique string identifier (`username@ip_address:port`) for a `MasshClient` target host.
 pub type MasshHost = String;
 
-/// Receiving half of a [`std::sync::mpsc::channel`]. Exactly 1 message per host is received.
+/// Receiving half of a `std::sync::mpsc::channel` which receives exactly 1 message per host.
 pub type MasshReceiver<T> = Receiver<(MasshHost, Result<T>)>;
 
 /// SSH client to run commands on multiple hosts in parallel.
