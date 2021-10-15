@@ -20,8 +20,14 @@ Documentation: https://docs.rs/massh
 
 A Rust version of the parallel SSH program [`pssh(1)`](https://linux.die.net/man/1/pssh)
 
+#### Usage:
+
+![Usage](USAGE.png)
+
 ## masshd binary crate (GUI)
 
 A web application that runs on http://localhost:22
 
-WIP: Right now, it only serves placeholder static files but the intention is to support all the features of the CLI and more.
+#### WIP
+
+Right now, it only serves placeholder static files but the intention is to support all the features of the CLI and more.
