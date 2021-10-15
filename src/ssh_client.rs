@@ -238,7 +238,7 @@ impl SshClient {
     /// Note that this method implicitly calls [`SshClient::connect`] if no session was
     /// established prior. Otherwise, it reuses the cached session.
     ///
-    /// If successful, it returns a [`SshOutput`] containing the exit status, standard output,
+    /// If successful, it returns an [`SshOutput`] containing the exit status, standard output,
     /// and standard error of the command.
     ///
     /// ## Example

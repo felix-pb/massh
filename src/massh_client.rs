@@ -28,7 +28,7 @@ pub type MasshReceiver<T> = Receiver<(MasshHost, Result<T>)>;
 /// ## Example
 ///
 /// ```no_run
-/// use massh::{MasshConfig, MasshClient};
+/// use massh::{MasshClient, MasshConfig};
 ///
 /// // Construct a new `MasshClient` from a YAML configuration file.
 /// let yaml = std::fs::read_to_string("massh.yaml").unwrap();
@@ -53,13 +53,13 @@ pub struct MasshClient {
 }
 
 impl MasshClient {
-    /// Constructs a new `MasshClient` from the specified configuration file.
+    /// Constructs a new `MasshClient` from the specified configuration.
     ///
     /// See [`MasshConfig`] for more details.
     ///
     /// ## Example
     /// ```no_run
-    /// use massh::{MasshConfig, MasshClient};
+    /// use massh::{MasshClient, MasshConfig};
     ///
     /// let yaml = std::fs::read_to_string("massh.yaml").unwrap();
     /// let config = MasshConfig::from_json(&yaml).unwrap();
@@ -105,9 +105,9 @@ impl MasshClient {
         MasshClient { clients, pool }
     }
 
-    /// Attempts to execute a command on the configured hosts.
+    /// Attempts to execute a command on all configured hosts.
     ///
-    /// It returns a [`MasshReceiver`] that receives exactly 1 message per host.
+    /// It returns a [`MasshReceiver`] which receives exactly 1 message per host.
     /// Each message contains the result of the operation.
     ///
     /// ## Example
@@ -149,12 +149,12 @@ impl MasshClient {
         rx
     }
 
-    /// Attempts to download a file from the configured hosts.
+    /// Attempts to download a file from all configured hosts.
     ///
-    /// It returns a [`MasshReceiver`] that receives exactly 1 message per host.
+    /// It returns a [`MasshReceiver`] which receives exactly 1 message per host.
     /// Each message contains the result of the operation.
     ///
-    /// Note that the downloaded file names are of the form "user@ip-address:port".
+    /// Note that the downloaded filenames are of the form `username@ip_address:port`.
     ///
     /// ## Example
     /// ```no_run
@@ -199,9 +199,9 @@ impl MasshClient {
         rx
     }
 
-    /// Attempts to upload a file to the configured hosts.
+    /// Attempts to upload a file to all configured hosts.
     ///
-    /// It returns a [`MasshReceiver`] that receives exactly 1 message per host.
+    /// It returns a [`MasshReceiver`] which receives exactly 1 message per host.
     /// Each message contains the result of the operation.
     ///
     /// ## Example
