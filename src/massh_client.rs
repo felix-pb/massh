@@ -180,9 +180,9 @@ impl MasshClient {
             // Prepare a task closure responsible for sending the result of the operation.
             let (client, host, tx) = (client.clone(), host.clone(), tx.clone());
             let (remote_path, mut local_path) = (remote_path.clone(), local_path.clone());
+            local_path.push(&host);
             let task_closure = move || {
                 let mut client = client.lock();
-                local_path.push(&host);
                 let result = client.scp_download(remote_path, local_path);
                 let _ = tx.send((host, result));
             };
