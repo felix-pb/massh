@@ -32,7 +32,7 @@ pub type MasshReceiver<T> = Receiver<(MasshHost, Result<T>)>;
 ///
 /// // Construct a new `MasshClient` from a YAML configuration file.
 /// let yaml = std::fs::read_to_string("massh.yaml").unwrap();
-/// let config = MasshConfig::from_json(&yaml).unwrap();
+/// let config = MasshConfig::from_yaml(&yaml).unwrap();
 /// let massh = MasshClient::from(&config);
 ///
 /// // Run a command on all the configured hosts.
@@ -62,7 +62,7 @@ impl MasshClient {
     /// use massh::{MasshClient, MasshConfig};
     ///
     /// let yaml = std::fs::read_to_string("massh.yaml").unwrap();
-    /// let config = MasshConfig::from_json(&yaml).unwrap();
+    /// let config = MasshConfig::from_yaml(&yaml).unwrap();
     /// let massh = MasshClient::from(&config);
     /// ```
     pub fn from(config: &MasshConfig) -> Self {
